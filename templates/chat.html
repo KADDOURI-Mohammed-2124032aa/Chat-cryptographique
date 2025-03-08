@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Sécurisé</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 400px;
+            height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 5px;
+            max-width: 70%;
+        }
+        .message.sent {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.received {
+            background: #e0e0e0;
+            align-self: flex-start;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #fff;
+            border-top: 1px solid #ddd;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .chat-input button {
+            margin-left: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            Chat Sécurisé
+            <select id="user">
+                <option value="alice">Alice</option>
+                <option value="bob">Bob</option>
+            </select>
+            <select id="recipient">
+                <option value="bob">Bob</option>
+                <option value="alice">Alice</option>
+            </select>
+        </div>
+        <div class="chat-messages" id="messages"></div>
+        <div class="chat-input">
+            <input type="text" id="message" placeholder="Écris un message...">
+            <button onclick="sendMessage()">Envoyer</button>
+        </div>
+    </div>
+
+    <script>
+        var socket = io();
+        let user = "alice"; // Par défaut Alice
+        let recipient = "bob";
+
+        document.getElementById("user").addEventListener("change", function() {
+            user = this.value;
+            updateRecipientOptions();
+            joinChatRoom();
+        });
+
+        document.getElementById("recipient").addEventListener("change", function() {
+            recipient = this.value;
+        });
+
+        function joinChatRoom() {
+            socket.emit('join', { username: user });
+        }
+
+        function sendMessage() {
+            let message = document.getElementById("message").value;
+            if (!message) return;
+
+            socket.send({ sender: user, recipient: recipient, message: message });
+
+            addMessage(user, message, "sent");
+            document.getElementById("message").value = "";
+        }
+
+        function addMessage(sender, msg, type) {
+            let messagesDiv = document.getElementById("messages");
+            let messageElement = document.createElement("div");
+            messageElement.classList.add("message", type);
+            messageElement.innerText = sender + ": " + msg;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        socket.on("message", function(data) {
+            if (data.sender !== user) {
+                addMessage(data.sender, data.message, "received");
+            }
+        });
+
+        socket.on("history", function(data) {
+            let messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = "";
+            data.messages.forEach(msg => {
+                let type = msg.sender === user ? "sent" : "received";
+                addMessage(msg.sender, msg.message, type);
+            });
+        });
+
+        function updateRecipientOptions() {
+            let recipientSelect = document.getElementById("recipient");
+            recipientSelect.innerHTML = "";
+
+            if (user === "alice") {
+                recipientSelect.innerHTML += "<option value='bob'>Bob</option>";
+            } else {
+                recipientSelect.innerHTML += "<option value='alice'>Alice</option>";
+            }
+
+            recipient = recipientSelect.value;
+        }
+
+        joinChatRoom();
+    </script>
+
+</body>
+</html>
+
