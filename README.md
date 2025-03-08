@@ -10,7 +10,6 @@ L'objectif principal est d'intégrer plusieurs mécanismes de sécurité :
 - **Empreinte des clés publiques (hash SHA-256)** pour empêcher les attaques MITM.
 - **Protection contre les modifications** grâce à l'authentification intégrée.
 
-Ce document détaille en profondeur l’architecture cryptographique utilisée, les algorithmes employés et leur implémentation.
 
 ---
 
