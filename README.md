@@ -1,4 +1,4 @@
-# 📜 Rapport sur le projet de chat sécurisé
+# 📜 Projet de chat sécurisé
 
 ## 🔒 Introduction
 Ce projet vise à implémenter un **chat sécurisé** avec un chiffrement **de bout en bout (E2EE)**, garantissant que seuls les interlocuteurs peuvent lire les messages échangés. Nous utilisons **NaCl/libsodium**, une bibliothèque cryptographique reconnue pour sa sécurité et sa simplicité d'utilisation.
